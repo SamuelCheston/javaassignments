@@ -159,7 +159,7 @@ public class KrabApp {
                     break;
 
                 case 4:
-                    System.out.println("\nThank you for using Kab App");
+                    System.out.println("\nThank you for using Krab App");
                     break;
 
                 default:
