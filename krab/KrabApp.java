@@ -1,8 +1,9 @@
 import java.util.Scanner;
-public class krab {
+public class KrabApp {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         int points = 0;
+        int pointsdiscount = 0;
 
 
 
@@ -15,6 +16,7 @@ public class krab {
         System.out.println("4- Exit");
         System.out.print("Choose Menu : ");
         int menu = scanner.nextInt();
+        do {
         switch (menu) {
             case 1:
                 double distancefee = 0;
@@ -27,14 +29,10 @@ public class krab {
                 System.out.print("Have " + points + " Krab points, use points? (Y/N) : ");
                 String usePoints = scanner.next();
                 if ( usePoints.equals("Y") || usePoints.equals("y") ) {
-                    int pointsdiscount = (int)points / 10;
+                    pointsdiscount = (int)points / 10;
 
                     // Calculate distance fee
-                    if ( distance <= 5 ) {
-                         distancefee = 5;
-                    } else {
                      distancefee =  6 * Math.pow(0.5 * distance - 2, 0.5) + 5;
-                }
                 // Compare discount with total fee
                 if ( pointsdiscount >= distancefee + toll ) {
                     totalfee = 0;
@@ -42,15 +40,20 @@ public class krab {
                 } else {
                     totalfee = distancefee + toll - pointsdiscount;
                 }
+                    } else if ( usePoints.equals("N") || usePoints.equals("n") ) {
                 // Calculate points earned
                 if (usePoints.equals("N") || usePoints.equals("n")) {
-                    points += (int)totalfee / 10;
+                    points += (int)totalfee * 10;
+                }else{
+                    points += (int)totalfee * 10;
                 }
+                    }
+
                 System.out.println("Trip cost: " + distancefee);
                 System.out.println("Toll cost: " + toll);
                 System.out.println("Points discount: " + pointsdiscount);
                 System.out.println("Total fee: " + totalfee);
-                break;
+                    break;
             case 2:
                 System.out.println("Krab Food");
                 break;
@@ -63,5 +66,7 @@ public class krab {
             default:
                 System.out.println("Invalid Menu");
         }
-    }
+      } while ( menu != 4 );
+      scanner.close();
+}
 }
