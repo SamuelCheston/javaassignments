@@ -33,7 +33,10 @@ public class StuSysMain {
         }
         System.out.println("Successfully created account " + "'" + stuID + "'");
 
-        // Pass account information to database
+        // Store account information to database
+        // Create Database instance first if using instance method, or implement storeAccount in Database class
+        StuSysDB db = new StuSysDB();
+        db.storeAccount(stuID, stuName, stuPassword);
         
         break;
       case 2:
