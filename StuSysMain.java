@@ -1,5 +1,6 @@
 import java.util.Scanner;
 public class StuSysMain {
+  
   public static void main(String[] args) {
     System.out.println("======================================");
     System.out.println("|   WELCOME TO CIMP STUNDENT SYSTEM   |");
@@ -10,6 +11,10 @@ public class StuSysMain {
     System.out.println("Pick an option");
     System.out.println("======================================");
     Scanner sc = new Scanner(System.in);
+    // declare student credentials here so they are visible to all cases
+    String stuID = "";
+    String stuName = "";
+    String stuPassword = "";
     int option = sc.nextInt();
 
     switch(option){
@@ -19,25 +24,25 @@ public class StuSysMain {
         System.out.println("|   CREATE ACCOUNT   |");
         System.out.println("----------------------");
         System.out.printf("%-20s", "Student ID: ");
-        String stuID = sc.next();
+        stuID = sc.next();
         System.out.printf("%-20s", "Full Name: ");
-        String stuName = sc.next();
+        stuName = sc.next();
         System.out.printf("%-20s", "Password: ");
-        String stuPassword = sc.next();
+        stuPassword = sc.next();
         System.out.printf("%-20s", "Retype Password: ");
         String retypePassword = sc.next();
-        // Check if password matches
-        if(!stuPassword.equals(retypePassword)){
-          System.out.println("Password do not match!");
-          break;
-        }
-        System.out.println("Successfully created account " + "'" + stuID + "'");
 
-        // Store account information to database
-        // Create Database instance first if using instance method, or implement storeAccount in Database class
-        StuSysDB db = new StuSysDB();
-        db.storeAccount(stuID, stuName, stuPassword);
-        
+        // Pass info to backend
+        StuSys CNewAcct = new StuSys();
+        int result = CNewAcct.CreateNewAcct(stuName, stuPassword, retypePassword);
+
+        // Check if account creation was successful
+        if (result == 1) {
+          System.out.println("Account created successfully!");
+        } else {
+          System.out.println("Failed to create account. Error code: " + result);
+        }
+
         break;
       case 2:
         System.out.println("----------------------");
@@ -47,7 +52,9 @@ public class StuSysMain {
         String loginID = sc.next();
         System.out.printf("%-20s", "Password: ");
         String loginPassword = sc.next();
-        if(!loginID.equals(stuID) || !loginPassword.equals(stuPassword)){
+        StuSys CLogin = new StuSys();
+        int loginResult = CLogin.Login(loginID, loginPassword);
+        if(loginResult != 1){
           System.out.println("Invalid login credentials!");
         }
         else{
