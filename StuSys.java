@@ -63,12 +63,24 @@ public class StuSys {
    *               Returns -1, if account ID not found in the database.
    *               Returns -2, if password associated with the ID is not correct. */
   public int Login(String id, String pass) {
-    return 0;  // Dummy return value
+    // Check if account ID exists in the database
+    if (!db.IsAcctExist(id)) {
+      return -1; // Account ID not found
+    }
+    
+    // Check if password matches the stored password for that ID
+    String storedPass = db.GetAcctPass(id);
+    if (storedPass != null && storedPass.equals(pass)) {
+      loginAcctId = id; // Update the login state
+      return 1; // Login successful
+    }
+    
+    return -2; // Password associated with the ID is incorrect
   }
   
   /* Logout the currently logged in student from the system. */
   public void Logout() {
-    
+    loginAcctId = null;
   }
   
   /* Get the student's name with the given account ID from 
@@ -77,7 +89,7 @@ public class StuSys {
    * @return   - Returns The student name of the account if the ID is found.
    *             Returns null if the ID is not found. */
   public String GetStudentName(String id) {
-    return null;  // Dummy return value
+    return db.GetAcctName(id);
   }
   
   /* Get the number of courses the specified account has 
