@@ -113,13 +113,63 @@ public class StuSysMain {
             }
             break;
           case 2:
+            System.out.println("---------------------------");
             System.out.println("Add Courses");
+            System.out.println("---------------------------");
+            System.out.println("Course to add: ");
+            String courseToAdd = sc.next();
+            int addResult = CLogin.AddCourse(loginID, courseToAdd);
+            if (addResult == 1) {
+              System.out.println("Successful added " + courseToAdd );
+            } else {
+              System.out.println("Failed to add course. Error code: " + addResult);
+            }
+
             break;
           case 3:
+            System.out.println("---------------------------");
             System.out.println("Drop Courses");
+            System.out.println("---------------------------");
+
+            // List current courses before dropping
+            if (numCourses > 0) {
+              for (int i = 0; i < numCourses; i++) {
+                String courseName = CLogin.GetCourseName(loginID, i);
+                System.out.printf("%-20s", courseName);
+                System.out.println("");
+              }
+            } else {
+              System.out.println("No course at the moment!");
+              break;
+            }
+            System.out.println("Select course number to drop: ");
+            String courseToDrop = sc.next();
+            int dropResult = CLogin.DropCourse(loginID, courseToDrop);
+            if (dropResult == 1) {
+              System.out.println("Successfully dropped the course");
+            } else {
+              System.out.println("Failed to drop course. Error code: " + dropResult);
+            }
             break;
           case 4:
+            System.out.println("---------------------------");
             System.out.println("Edit Course Grade");
+            System.out.println("---------------------------"); 
+            // List current courses before editing
+            if (numCourses > 0) {
+              System.out.println("YOUR CURRENT COURSES:");
+              for (int i = 0; i < numCourses; i++) {
+                String courseName = CLogin.GetCourseName(loginID, i);
+                String courseGrade = CLogin.GetCourseGrade(loginID, i);
+                System.out.printf("%-20s", courseName);
+                System.out.print(":");
+                System.out.printf("%-20s", courseGrade);
+                System.out.println("");
+              }
+            } else {
+              System.out.println("No course at the moment!");
+              break;
+            }
             break;
           case 5:
             System.out.println("Change Password");
