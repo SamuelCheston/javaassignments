@@ -223,8 +223,8 @@ public class StuSys {
     if (!db.IsAcctExist(id)) return -1;
     String[] entries = getCourseEntries(id);
     if (pos < 0 || pos >= entries.length) return -5;
-    // Database API does not support removing a course directly.
-    // Return success code but do not modify database.
+    // Set course grade to -8
+    db.UpdateCourseGradeAt(id, pos, -8);
     return 1;
   }   
   

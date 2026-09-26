@@ -103,9 +103,9 @@ public class StuSysMain {
 
             switch(option2){
               case 1:
-                System.out.println("---------------------------");
-                System.out.println("|   Student Detail   |");
-                System.out.println("---------------------------");
+                System.out.println("----------------------------");
+                System.out.println("|      Student Detail      |");
+                System.out.println("----------------------------");
                 System.out.printf("%-20s", "|Student ID");
                 System.out.print(":");
                 System.out.println(loginID);
@@ -141,9 +141,9 @@ public class StuSysMain {
                 }
                 break;
               case 2:
-                System.out.println("---------------------------");
-                System.out.println("Add Courses");
-                System.out.println("---------------------------");
+                System.out.println("----------------------------");
+                System.out.println("|        Add Courses        |");
+                System.out.println("----------------------------");
                 System.out.println("Course to add: ");
                 String courseToAdd = sc.nextLine();
                 if (sys.AddCourse(loginID, courseToAdd)) {
@@ -153,9 +153,9 @@ public class StuSysMain {
                 }
                 break;
               case 3:
-                System.out.println("---------------------------");
-                System.out.println("Drop Courses");
-                System.out.println("---------------------------");
+                System.out.println("----------------------------");
+                System.out.println("|        Drop Courses       |");
+                System.out.println("----------------------------");
                 if (numCourses > 0) {
                   for (int i = 0; i < numCourses; i++) {
                     System.out.printf("%d. %s\n", (i+1), sys.GetCourseName(loginID, i));
@@ -174,9 +174,9 @@ public class StuSysMain {
                 }
                 break;
               case 4:
-                System.out.println("---------------------------");
-                System.out.println("Edit Course Grade");
-                System.out.println("---------------------------");
+                System.out.println("----------------------------");
+                System.out.println("|     Edit Course Grade     |");
+                System.out.println("----------------------------");
                 if (numCourses > 0) {
                   for (int i = 0; i < numCourses; i++) {
                     System.out.printf("%d. %s (Grade: %d)\n", (i+1), sys.GetCourseName(loginID, i), sys.GetCourseGradeAt(loginID, i));
@@ -198,9 +198,9 @@ public class StuSysMain {
                 }
                 break;
               case 5:
-                System.out.println("---------------------------");
-                System.out.println("Change Password");
-                System.out.println("---------------------------");
+                System.out.println("----------------------------");
+                System.out.println("|      Change Password      |");
+                System.out.println("----------------------------");
                 System.out.println("Enter old password:");
                 String oldPass = sc.nextLine();
                 System.out.println("Enter new password:");
