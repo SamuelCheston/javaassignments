@@ -55,7 +55,11 @@ public class StuSys {
    *                     Returns -3, if password and retype password don't match 
    *                     Returns -4, if number of accounts have reached its limit
    *                     Returns -7, if password is not 5 characters. */
-  public int CreateNewAcct(String name, String pass, String retypePass ) {
+  public int CreateNewAcct(String id, String name, String pass, String retypePass ) {
+    // Check if ID already exists
+    if (db.IsAcctExist(id)) {
+      return -1; // Account ID already exists
+    }
     // Check if password and retype password match
     if (!pass.equals(retypePass)) {
       return -3; // Passwords do not match
@@ -65,8 +69,7 @@ public class StuSys {
       return -7; // Password is not 5 characters
     }
     // Store the new account in the database
-    if (db.AddAcct(String.valueOf(currNewId), name, pass)) {
-      currNewId++;
+    if (db.AddAcct(id, name, pass)) {
       return 1;
     }
     return -4;
