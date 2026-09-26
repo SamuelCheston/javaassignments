@@ -131,11 +131,19 @@ public class StuSys {
     return GetCourseNameAt(id, pos);
   }
 
-  // Returns grade as string for UI; use "--" when no grade
+  // Returns grade as string for UI; use "--" when no grade or dropped
   public String GetCourseGrade(String id, int pos) {
+    if (!db.IsAcctExist(id)) {
+      return null;
+    }
     int g = GetCourseGradeAt(id, pos);
     if (g >= 0) return String.valueOf(g);
-    return "--";
+    else if (g == -8) {
+      return "DROPPED";
+    }
+    else {
+      return "N/A";
+    }
   }
   
   /* Get the course's name stored at the specified position in the database
@@ -208,7 +216,9 @@ public class StuSys {
    * @return           - Returns TRUE if successful added the course 
    *                     Returns FALSE if account ID is not found. */
   public boolean AddCourse( String id, String courseName ) {
+    // Check if account ID exists
     if (!db.IsAcctExist(id)) return false;
+    // Add course to account
     return db.AddCourse(id, courseName);
   }      
   

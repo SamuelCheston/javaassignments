@@ -114,10 +114,15 @@ public class StuSysMain {
                 System.out.println(studentName);
                 System.out.printf("%-20s", "|GPA");
                 System.out.print(":");
+                // Display GPA if it is not -1
+                // If it is -1, display "N/A"
+                // If it is -8, display "DROPPED"
                 if (studentgpa >= 0) {
                   System.out.printf("%.2f\n", studentgpa);
-                } else {
+                } else if (studentgpa == -1) {
                   System.out.println("N/A");
+                } else if (studentgpa == -8) {
+                  System.out.println("DROPPED");
                 }
                 System.out.println("---------------------------");
                 System.out.println("");
@@ -127,13 +132,16 @@ public class StuSysMain {
                 if (numCourses > 0) {
                   for (int i = 0; i < numCourses; i++) {
                     String cName = sys.GetCourseName(loginID, i);
-                    int cGrade = sys.GetCourseGradeAt(loginID, i);
+                    String cGrade = sys.GetCourseGrade(loginID, i);
                     System.out.printf("%-20s", cName);
                     System.out.print(":");
-                    if (cGrade >= 0) {
-                      System.out.printf("%-20d\n", cGrade);
+                    // If grade is -8, display "DROPPED"
+                    if (cGrade.contains("-8")) {
+                      System.out.printf("%-20s\n", cGrade);
+                    } else if (cGrade.contains("N/A")) {
+                      System.out.printf("%-20s\n", cGrade);
                     } else {
-                      System.out.printf("%-20s\n", "N/A");
+                      System.out.printf("%-20s\n", cGrade);
                     }
                   }
                 } else {
@@ -163,6 +171,7 @@ public class StuSysMain {
                   System.out.println("Select course number to drop: ");
                   int dropPos = sc.nextInt();
                   sc.nextLine();
+                  // Drop the course
                   int dResult = sys.DropCourse(loginID, dropPos - 1);
                   if (dResult == 1) {
                     System.out.println("Successfully dropped the course");
@@ -179,7 +188,7 @@ public class StuSysMain {
                 System.out.println("----------------------------");
                 if (numCourses > 0) {
                   for (int i = 0; i < numCourses; i++) {
-                    System.out.printf("%d. %s (Grade: %d)\n", (i+1), sys.GetCourseName(loginID, i), sys.GetCourseGradeAt(loginID, i));
+                    System.out.printf("%d. %s (Grade: %s)\n", (i+1), sys.GetCourseName(loginID, i), sys.GetCourseGrade(loginID, i));
                   }
                   System.out.println("Select course number to edit: ");
                   int editPos = sc.nextInt();
