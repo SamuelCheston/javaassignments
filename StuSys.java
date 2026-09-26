@@ -1,18 +1,29 @@
 public class StuSys {
   // Global variables from the StuSys class. 
   // (Place your Global Constant variables here)
+  public final static int START_ID = 10000;
+  public final static int SUCCESS = 1;
+  public final static int ERR_LOGIN_FAIL = -1;
+  public final static int ERR_PASS_WRONG = -2;
+  public final static int ERR_PASS_MISMATCH = -3;
+  public final static int ERR_DB_FULL = -4;
+  public final static int ERR_POS_INVALID = -5;
+  public final static int ERR_GRADE_INVALID = -6;
+  public final static int ERR_PASS_LEN = -7;
   
+  public final static int GRADE_TBD = -100;
+  public final static int GRADE_DROPPED = -200;
   
   // Instance Variables (DO NOT MODIFY)
   private Database db;
-  String loginAcctId;             /* Keeps track of the currently logged User ID. It will be null whe
+  String loginUserId;             /* Keeps track of the currently logged User ID. It will be null when
                                      no one is logged in. */
   int currNewId;                  // The next new user's ID. 
   
   //========== CONSTRUCTOR ==========//
   public StuSys() {
     db = new Database();
-    currNewId = 1;
+    currNewId = START_ID;
   }
   
   //========= PRIVATE METHOD =========//
@@ -26,15 +37,42 @@ public class StuSys {
     String[] parts = all.split(":");
     // filter out empty entries
     int cnt = 0;
-    for (String p : parts) if (!p.equals("")) cnt++;
+    for (int i = 0; i < parts.length; i++) {
+      if (!parts[i].equals("")) {
+        cnt++;
+      }
+    }
     String[] res = new String[cnt];
     int idx = 0;
-    for (String p : parts) {
-      if (!p.equals("")) res[idx++] = p;
+    for (int i = 0; i < parts.length; i++) {
+      if (!parts[i].equals("")) {
+        res[idx++] = parts[i];
+      }
     }
     return res;
   }
+
+  // Helper: parse grade from a course entry
+  private int parseGrade(String entry) {
+    String[] parts = entry.split("_");
+    if (parts.length < 2 || parts[1].equals("")) {
+      return GRADE_TBD;
+    }
+    try {
+      return Integer.parseInt(parts[1]);
+    } catch (NumberFormatException e) {
+      return GRADE_TBD;
+    }
+  }
   
+  
+  // Helper: check if grade is valid (0-100)
+  private boolean isValidGrade(int grade) {
+    if (grade >= 0 && grade <= 100) {
+      return true;
+    }
+    return false;
+  }
   
   //========= PUBLIC METHOD =========//
   /* PROVIDED METHOD 
@@ -55,24 +93,25 @@ public class StuSys {
    *                     Returns -3, if password and retype password don't match 
    *                     Returns -4, if number of accounts have reached its limit
    *                     Returns -7, if password is not 5 characters. */
-  public int CreateNewAcct(String id, String name, String pass, String retypePass ) {
-    // Check if ID already exists
-    if (db.IsAcctExist(id)) {
-      return -1; // Account ID already exists
-    }
+  public int CreateNewAcct(String name, String pass, String retypePass ) {
     // Check if password and retype password match
     if (!pass.equals(retypePass)) {
-      return -3; // Passwords do not match
+      return ERR_PASS_MISMATCH;
     }
     // Check if password is 5 characters
     if (pass.length() != 5) {
-      return -7; // Password is not 5 characters
+      return ERR_PASS_LEN;
     }
+    
+    // Generate ID
+    String id = String.valueOf(currNewId);
+    
     // Store the new account in the database
     if (db.AddAcct(id, name, pass)) {
-      return 1;
+      currNewId++;
+      return SUCCESS;
     }
-    return -4;
+    return ERR_DB_FULL;
   }
   
   /* Login a user with the given student ID and password
@@ -85,22 +124,21 @@ public class StuSys {
   public int Login(String id, String pass) {
     // Check if the account ID exists in the database
     if (!db.IsAcctExist(id)) {
-      return -1; // Account ID not found
+      return ERR_LOGIN_FAIL;
     }
     // Check if the password is correct
-    // Get PWD
     String storedPass = db.GetAcctPass(id);
     if (!storedPass.equals(pass)) {
-      return -2; // Incorrect password
+      return ERR_PASS_WRONG;
     }
     // set logged in account id
-    loginAcctId = id;
-    return 1; // Login successful
+    loginUserId = id;
+    return SUCCESS;
   }
 
   /* Logout the currently logged in student from the system. */
   public void Logout() {
-    loginAcctId = null;
+    loginUserId = null;
   }
   
   /* Get the student's name with the given account ID from 
@@ -126,26 +164,6 @@ public class StuSys {
     return getCourseEntries(id).length;
   }   
 
-  // Backwards-compatible wrapper used by UI
-  public String GetCourseName(String id, int pos) {
-    return GetCourseNameAt(id, pos);
-  }
-
-  // Returns grade as string for UI; use "--" when no grade or dropped
-  public String GetCourseGrade(String id, int pos) {
-    if (!db.IsAcctExist(id)) {
-      return null;
-    }
-    int g = GetCourseGradeAt(id, pos);
-    if (g >= 0) return String.valueOf(g);
-    else if (g == -8) {
-      return "DROPPED";
-    }
-    else {
-      return "N/A";
-    }
-  }
-  
   /* Get the course's name stored at the specified position in the database
    * @param id  - The account ID
    * @param pos - The pos where the course is stored in the database. 
@@ -157,9 +175,14 @@ public class StuSys {
       return null;
     }
     String[] entries = getCourseEntries(id);
-    if (pos < 0 || pos >= entries.length) return null;
+    if (pos < 0 || pos >= entries.length) {
+      return null;
+    }
     String[] parts = entries[pos].split("_");
-    return parts.length > 0 ? parts[0] : null;
+    if (parts.length > 0) {
+      return parts[0];
+    }
+    return null;
   }
   
   /* Get the course's grade stored at the specified position in the database
@@ -174,17 +197,10 @@ public class StuSys {
       return -1;
     }
     String[] entries = getCourseEntries(id);
-    if (pos < 0 || pos >= entries.length) return -5;
-    String[] parts = entries[pos].split("_");
-    if (parts.length < 2 || parts[1].equals("")) {
-      return -8; // no grade yet
+    if (pos < 0 || pos >= entries.length) {
+      return ERR_POS_INVALID;
     }
-    try {
-      return Integer.parseInt(parts[1]);
-    }
-    catch (NumberFormatException e) {
-      return -8;
-    }
+    return parseGrade(entries[pos]);
   }
   
   /* Get the student's GPA, the overall average of all completed courses.
@@ -194,7 +210,7 @@ public class StuSys {
    *             Returns -8, if there's no courses completed */
   public double GetGPA(String id) {
     if (!db.IsAcctExist(id)) {
-      return -1;
+      return -1.0;
     }
     String[] entries = getCourseEntries(id);
     int total = 0;
@@ -206,7 +222,9 @@ public class StuSys {
         completed++;
       }
     }
-    if (completed == 0) return -8;
+    if (completed == 0) {
+      return -8.0;
+    }
     return (double) total / completed;
   }
   
@@ -217,7 +235,9 @@ public class StuSys {
    *                     Returns FALSE if account ID is not found. */
   public boolean AddCourse( String id, String courseName ) {
     // Check if account ID exists
-    if (!db.IsAcctExist(id)) return false;
+    if (!db.IsAcctExist(id)) {
+      return false;
+    }
     // Add course to account
     return db.AddCourse(id, courseName);
   }      
@@ -230,12 +250,18 @@ public class StuSys {
    *              Returns -1, if account ID not found in the database
    *              Returns -5, if pos specified is beyond the range of number of courses. */
   public int DropCourse( String id, int pos ) {
-    if (!db.IsAcctExist(id)) return -1;
+    if (!db.IsAcctExist(id)) {
+      return ERR_LOGIN_FAIL;
+    }
     String[] entries = getCourseEntries(id);
-    if (pos < 0 || pos >= entries.length) return -5;
-    // Set course grade to -8
-    db.UpdateCourseGradeAt(id, pos, -8);
-    return 1;
+    if (pos < 0 || pos >= entries.length) {
+      return ERR_POS_INVALID;
+    }
+    // Set course grade to GRADE_DROPPED
+    if (db.UpdateCourseGradeAt(id, pos, GRADE_DROPPED)) {
+      return SUCCESS;
+    }
+    return ERR_LOGIN_FAIL;
   }   
   
   /* Edit a course's grade in an account 
@@ -248,12 +274,20 @@ public class StuSys {
    *                  Returns -5, if pos specified is beyond the range of number of courses
    *                  Returns -6, if grade is not valid (not between 0-100) */   
   public int EditCourse( String id, int pos, int grade ) {
-    if (!db.IsAcctExist(id)) return -1;
-    if (grade < 0 || grade > 100) return -6;
+    if (!db.IsAcctExist(id)) {
+      return ERR_LOGIN_FAIL;
+    }
+    if (!isValidGrade(grade)) {
+      return ERR_GRADE_INVALID;
+    }
     String[] entries = getCourseEntries(id);
-    if (pos < 0 || pos >= entries.length) return -5;
-    boolean ok = db.UpdateCourseGradeAt(id, pos, grade);
-    return ok ? 1 : -1;
+    if (pos < 0 || pos >= entries.length) {
+      return ERR_POS_INVALID;
+    }
+    if (db.UpdateCourseGradeAt(id, pos, grade)) {
+      return SUCCESS;
+    }
+    return ERR_LOGIN_FAIL;
   }
   
   /* Change the account's password
@@ -265,13 +299,23 @@ public class StuSys {
    *               Returns -3, if password and retype password don't match 
    *               Returns -7, if new password is not 5 characters. */
   public int ChangePassword( String id, String oldPass, String newPass, String retypePass ) {
-    if (!db.IsAcctExist(id)) return -1;
+    if (!db.IsAcctExist(id)) {
+      return ERR_LOGIN_FAIL;
+    }
     String curr = db.GetAcctPass(id);
-    if (!curr.equals(oldPass)) return -2;
-    if (!newPass.equals(retypePass)) return -3;
-    if (newPass.length() != 5) return -7;
-    boolean ok = db.UpdateAcctPass(id, newPass);
-    return ok ? 1 : -1;
+    if (!curr.equals(oldPass)) {
+      return ERR_PASS_WRONG;
+    }
+    if (!newPass.equals(retypePass)) {
+      return ERR_PASS_MISMATCH;
+    }
+    if (newPass.length() != 5) {
+      return ERR_PASS_LEN;
+    }
+    if (db.UpdateAcctPass(id, newPass)) {
+      return SUCCESS;
+    }
+    return ERR_LOGIN_FAIL;
   }   
   
   /* PROVIDED METHOD
